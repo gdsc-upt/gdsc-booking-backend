@@ -490,3 +490,5 @@ fabric.properties
 # End of https://www.toptal.com/developers/gitignore/api/rider,dotnetcore,csharp
 
 appsettings.Development.json
+
+GdscBookingBackend/.idea/.idea.GdscBookingBackend/.idea/
