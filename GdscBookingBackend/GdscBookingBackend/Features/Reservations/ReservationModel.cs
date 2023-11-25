@@ -1,6 +1,6 @@
 namespace GdscBookingBackend.Features.Reservations;
 
-public class Reservation
+public class ReservationModel
 {
     public string Id { get; set; } = String.Empty;
     public DateTime Created { get; set; }
