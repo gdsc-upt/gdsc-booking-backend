@@ -1,22 +1,35 @@
 using GdscBookingBackend.Data;
+using GdscBookingBackend.Swagger;
+using Keycloak.AuthServices.Authentication;
+using Keycloak.AuthServices.Authorization;
+using Keycloak.AuthServices.Common;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
+var configuration = builder.Configuration;
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString = builder.Configuration.GetConnectionString("Default");
+var connectionString = configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+var keycloakOptions = configuration
+    .GetRequiredSection(ConfigurationConstants.ConfigurationPrefix)
+    .Get<KeycloakInstallationOptions>();
+
+if (keycloakOptions is null) throw new Exception("keyCloakAdminConfiguartions is null");
+
+builder.Services.AddSwaggerConfiguration(keycloakOptions);
+builder.Services.AddKeycloakAuthentication(configuration);
+builder.Services.AddAuthorization(
+    o => o.AddPolicy("Admin", b => { b.RequireRealmRoles("Admin");}));
+builder.Services.AddKeycloakAuthorization(configuration);
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -25,6 +38,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthorization();
 app.UseAuthorization();
 
 app.MapControllers();

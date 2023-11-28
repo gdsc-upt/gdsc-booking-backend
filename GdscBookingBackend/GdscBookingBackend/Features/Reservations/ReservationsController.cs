@@ -61,7 +61,8 @@ public class ReservationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ReservationView>> Get(string id)
     {
-        var result = await _dbContext.Reservations.FirstOrDefaultAsync(e => e.Id == id);
+        var result = await _dbContext.Reservations
+            .FirstOrDefaultAsync(e => e.Id == id);
         
         if(result == null)
         {
@@ -78,14 +79,16 @@ public class ReservationsController : ControllerBase
         });
     }
     
-    [HttpPatch("{id}")]
+    [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<ReservationView>> Put(string id, ReservationRequest request)
     {
-        var oldModel = await _dbContext.Reservations.FirstOrDefaultAsync(e => e.Id == id);
+        var oldModel = await _dbContext.Reservations.
+            FirstOrDefaultAsync(e => e.Id == id);
+        
         if (oldModel is null)
         {
             return NotFound($"Reservation with id {id} not found.");
@@ -100,7 +103,7 @@ public class ReservationsController : ControllerBase
             UserId = request.UserId.Equals(string.Empty) ? oldModel.UserId : request.UserId
         };
         
-        var result = _dbContext.Reservations.Update(newModel);
+        var result = _dbContext.Reservations.Update(newModel); // non sens, the entity is already tracking
         await _dbContext.SaveChangesAsync();
 
         return Ok(new ReservationView
@@ -120,7 +123,9 @@ public class ReservationsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<ReservationView>> Delete(string id)
     {
-        var model = await _dbContext.Reservations.FirstOrDefaultAsync(e => e.Id == id);
+        var model = await _dbContext.Reservations
+            .FirstOrDefaultAsync(e => e.Id == id);
+        
         if (model is null)
         {
             return NotFound($"Reservation with id {id} not found.");
